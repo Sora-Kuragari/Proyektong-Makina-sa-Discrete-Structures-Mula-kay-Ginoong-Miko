@@ -95,3 +95,15 @@ void SysInit(Sys_Var *sys) // Initializes all system variables accdg to specs
         }
     }
 }
+
+void replace(Sys_Var *pos, int row, int col){
+    if (pos->go == TRUE){
+        pos->R[row][col] = FALSE;
+    }
+    if (pos->go == FALSE){
+        pos->R[row][col] = FALSE;
+    }
+
+    pos->S[row][col] = FALSE;
+    pos->T[row][col] = FALSE;
+}
