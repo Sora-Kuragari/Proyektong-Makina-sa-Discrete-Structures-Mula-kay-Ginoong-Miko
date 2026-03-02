@@ -28,9 +28,10 @@ int isF(Sys_Var *sys, int row, int col) // Checks if specific cell is part of se
 int CountF(Sys_Var *sys) // Calculates how many cells are part of set F
 {
     int count = 0;
-    for (int i = 0; i < M_SIZE; i++)
+    int i, j;
+    for (i = 0; i < M_SIZE; i++)
     {
-        for (int j = 0; j < M_SIZE; j++)
+        for (j = 0; j < M_SIZE; j++)
         {
             if (isF(sys, i, j) == TRUE)
             {
@@ -44,9 +45,10 @@ int CountF(Sys_Var *sys) // Calculates how many cells are part of set F
 int CountSet(int set[M_SIZE][M_SIZE]) // Counts how many cells are part of a given set
 {
     int count = 0;
-    for (int i = 0; i < M_SIZE; i++)
+    int i, j;   
+    for (i = 0; i < M_SIZE; i++)
     {
-        for (int j = 0; j < M_SIZE; j++)
+        for (j = 0; j < M_SIZE; j++)
         {
             if (set[i][j] == TRUE)
             {
@@ -62,7 +64,7 @@ void CheckOver(Sys_Var *sys) // Checks if the game is over and updates over vari
     int countF = CountF(sys);
     int countR = CountSet(sys->R);
     int countB = CountSet(sys->B);
-    if (countF == 3 || sys->val >= 20 || sys->start == FALSE && ((count_R > 0 && count_B == 0) || (count_R == 0 && count_B > 0))
+    if (countF == 3 || sys->val >= 20 || sys->start == FALSE && ((countR > 0 && countB == 0) || (countR == 0 && countB > 0)))
     {
         sys->over = TRUE;
     }
@@ -74,15 +76,16 @@ void CheckOver(Sys_Var *sys) // Checks if the game is over and updates over vari
 
 void SysInit(Sys_Var *sys) // Initializes all system variables accdg to specs
 {
+    int i, j;
     sys->good = FALSE;
     sys->go = FALSE;
     sys->start = FALSE;
     sys->over = FALSE;
     sys->found = FALSE;
     sys->val = 0;
-    for (int i = 0; i < M_SIZE; i++)
+    for (i = 0; i < M_SIZE; i++)
     {
-        for (int j = 0; j < M_SIZE; j++)
+        for (j = 0; j < M_SIZE; j++)
         {
             sys->R[i][j] = FALSE;
             sys->B[i][j] = FALSE;
