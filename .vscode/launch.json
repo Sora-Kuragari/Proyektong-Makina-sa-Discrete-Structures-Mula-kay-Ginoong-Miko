@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "f:/stuff/DLSU/A.Y. 25-26 Term 2/CCDSTRU/DSTRU MP/Proyektong-Makina-sa-Discrete-Structures-Mula-kay-Ginoong-Miko",
+      "program": "f:/stuff/DLSU/A.Y. 25-26 Term 2/CCDSTRU/DSTRU MP/Proyektong-Makina-sa-Discrete-Structures-Mula-kay-Ginoong-Miko/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

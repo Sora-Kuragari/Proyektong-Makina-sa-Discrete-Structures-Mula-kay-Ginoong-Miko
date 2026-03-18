@@ -17,6 +17,7 @@ struct Sys_VarTag // System Variables
     int good, go, start, over, found; // Elements of Set V
     int val; // Element of Set N
     int R[M_SIZE][M_SIZE], B[M_SIZE][M_SIZE], S[M_SIZE][M_SIZE], T[M_SIZE][M_SIZE], F[M_SIZE][M_SIZE]; // All vars are subsets of set M
+    int xPos, yPos;
 
     char result[10]; // {"R wins", "B wins", "draw"}
 };
@@ -45,9 +46,9 @@ void SysInit(Sys_Var *sys) // Initializes all system variables according to spec
     }
 }
 
-int isF(Sys_Var *sys, int row, int col) // Checks if specific cell is part of set F
+int isF(Sys_Var *sys) // Checks if specific cell is part of set F
 {
-    if (sys->R[row][col] == false && sys->B[row][col] == false)
+    if (sys->R[sys->xPos][sys->yPos] == false && sys->B[sys->xPos][sys->yPos] == false)
     {
         return true;
     }
@@ -104,36 +105,36 @@ void CheckOver(Sys_Var *sys) // Checks if the game is over and updates over vari
 }
 
 
-void Remove(Sys_Var *pos, int row, int col){
+void Remove(Sys_Var *pos){
     if (pos->go == true){
-        pos->R[row][col] = false;
+        pos->R[sys->xPos][sys->yPos] = false;
     }
     if (pos->go == false){
-        pos->B[row][col] = false;
+        pos->B[sys->xPos][sys->yPos] = false;
     }
 
-    pos->S[row][col] = false;
-    pos->T[row][col] = false;
+    pos->S[sys->xPos][sys->yPos] = false;
+    pos->T[sys->xPos][sys->yPos] = false;
 }
 
 void GameOver(Sys_Var *var)
 {
-    int row, col;
+    int sys->xPos, sys->yPos;
     int Rcount = 0;
     int Bcount = 0;
 
     // Counts
-    for (row = 0; row < M_SIZE; row++)
+    for (sys->xPos = 0; sys->xPos < M_SIZE; sys->xPos++)
     {
-        for (col = 0; col < M_SIZE; col++)
+        for (sys->yPos = 0; sys->yPos < M_SIZE; sys->yPos++)
         {
-            if (var->R[row][col] == true)
+            if (var->R[sys->xPos][sys->yPos] == true)
             {
                 Rcount++;
             }
-            if (var->B[row][col] == true)
+            if (var->B[sys->xPos][sys->yPos] == true)
             {
-                Bcount++;
+                Bcount++;   
             }
         }
     }
@@ -150,6 +151,147 @@ void GameOver(Sys_Var *var)
         {
             strcpy(var->result, "draw");
         }
+    }
+}
+
+void Replace(Sys_Var *pos)
+{
+    pos->found = false;
+
+    //(go ∧ pos ∈ B) → (B = B − {pos} ∧ found = true)
+    if (go == true && B[pos->xPos][pos->yPos] == true)
+    {
+        pos->B[pos->xPos][pos->yPos] = false;
+        pos->found = true;
+    }
+    //(go ∧ pos ∈ R) → found = true
+    if (go == true && R[pos->xPos][pos->yPos] == true)
+    {
+        pos->found = true;
+    }
+    //(go ∧ pos̸∈ R) → (R = R ∪ {pos})
+    if (go == true && R[pos->xPos][pos->yPos] == false)
+    {
+        R[pos->xPos][pos->yPos] == true;
+    }
+    //(¬go ∧ pos ∈ R) → (R = R − {pos} ∧ found = true)
+    if (go == false && R[pos->xPos][pos->yPos] == true)
+    {
+        R[pos->xPos][pos->yPos] == false;
+        pos->found = true;
+    }
+    //(¬go ∧ pos ∈ B) → found = true
+    if (go == false && B[pos->xPos][pos->yPos] == true)
+    {
+        pos->found = true;
+    }
+    //(¬go ∧ pos̸∈ B) → (B = B ∪ {pos})
+    if (go == false && B[pos->xPos][pos->yPos] == false)
+    {
+        pos->B[pos->xPos][pos->yPos] = true;
+    }
+    //(found ∧ pos̸∈ S) → (S = S ∪ {pos} ∧ f ound = false)
+    if (found == true && S[pos->xPos][pos->yPos] == false)
+    {
+    S[pos->xPos][pos->yPos] == true;
+    pos->found = false;
+    }
+   //(found ∧ pos ∈ S ∧ pos̸∈ T ) → (T = T ∪ {pos} ∧ Expand(pos))
+   if (found == true && S[pos->xPos][pos->yPos] == true && T[pos->xPos][pos->yPos] == false)
+   {
+        T[pos->xPos][pos->yPos] == true;
+        Expand(*pos)
+   }
+}
+
+void Expand(Sys_Var *pos)
+{
+    //(a, b) = pos
+    int a = pos->xPos;
+    int b = pos->yPos;
+    //u, d, k, r ∈ M
+    int U[M_SIZE][M_SIZE];
+    int D[M_SIZE][M_SIZE];
+    int K[M_SIZE][M_SIZE];
+    int R[M_SIZE][M_SIZE];
+
+    //u = (a − 1, b)
+    U[a - 1][b] = true;
+    //d = (a + 1, b)
+    D[a + 1][b] = true;
+    //k = (a, b − 1)
+    K[a][b - 1] = true;
+    //r = (a, b + 1)
+    R[a][b + 1] = true;
+}
+
+void Update(Sys_Var *pos)
+{
+    if (pos->xPos < 0 || pos->xPos >= M_SIZE || pos->yPos < 0 || pos->yPos >= M_SIZE) 
+        {
+            return;
+        }
+
+    pos->good = false;
+
+    if (pos->S[pos->xPos][pos->yPos] == false)
+    {
+        pos->S[pos->xPos][pos->yPos] = true;
+
+        if (pos->good == false)
+        {
+            pos->good = true;
+                if (pos->good == false)
+                {
+                    pos->good = true;
+                }
+                else
+                {
+                    pos->good = false;
+                }
+        }
+    }
+    if (pos->good == false && pos->S[pos->xPos][pos->yPos] == true && pos->T[pos->xPos][pos->yPos] == false)
+    {
+        pos->T[pos->xPos][pos->yPos] = true;
+    }
+}
+
+void NextPlayerMove(Sys_Var *pos)
+{
+    //(¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
+    if (over == false && start == true && go == true)
+    {
+        R[pos->xPos][pos->yPos] == true;
+        S[pos->xPos][pos->yPos] == true;\
+        good = true;
+    }
+    //(¬over ∧ start ∧ ¬go) → (B = B ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
+    if (over == false && start == true and go == false)
+    {
+        B[pos->xPos][pos->yPos] == true;
+        S[pos->xPos][pos->yPos] == true;
+        good = true;
+    }
+    //(¬over ∧ ¬start ∧ (go ∧ pos ∈ R ∨ ¬go ∧ pos ∈ B)) → (Update(pos) ∧ good = true)
+    if (over == false && start == false && (go == true && R[pos->xPos][pos->yPos] == true || go == false && B[pos->xPos][pos->yPos]))
+    {
+        Update(*pos);
+        good = true;
+    }
+    //(start ∧ |R| = 1 ∧ |B| = 1) → start = false
+    int countR = CountSet(R);
+    int countB = CountSet(B);
+    if (start == true && countR == 1 && countB == 1)
+    {
+        start = false;
+    }
+    //(¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
+    if (over == false && good == true)
+    {
+        good = false;
+        go = false;
+        val = val + 1;
     }
 }
 
