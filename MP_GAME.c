@@ -46,24 +46,16 @@ void SysInit(Sys_Var *sys) // Initializes all system variables according to spec
     }
 }
 
-int isF(Sys_Var *sys) // Checks if specific cell is part of set F
-{
-    if (sys->R[sys->xPos][sys->yPos] == false && sys->B[sys->xPos][sys->yPos] == false)
-    {
-        return true;
-    }
-    return false;
-}
-
 int CountF(Sys_Var *sys) // Calculates how many cells are part of set F
 {
     int count = 0;
     int i, j;
+
     for (i = 0; i < M_SIZE; i++)
     {
         for (j = 0; j < M_SIZE; j++)
         {
-            if (isF(sys, i, j) == true)
+            if (sys->R[sys->xPos][sys->yPos] == false && sys->B[sys->xPos][sys->yPos] == false)
             {
                 count++;
             }
@@ -107,19 +99,18 @@ void CheckOver(Sys_Var *sys) // Checks if the game is over and updates over vari
 
 void Remove(Sys_Var *pos){
     if (pos->go == true){
-        pos->R[sys->xPos][sys->yPos] = false;
+        pos->R[pos->xPos][pos->yPos] = false;
     }
     if (pos->go == false){
-        pos->B[sys->xPos][sys->yPos] = false;
+        pos->B[pos->xPos][pos->yPos] = false;
     }
 
-    pos->S[sys->xPos][sys->yPos] = false;
-    pos->T[sys->xPos][sys->yPos] = false;
+    pos->S[pos->xPos][pos->yPos] = false;
+    pos->T[pos->xPos][pos->yPos] = false;
 }
 
-void GameOver(Sys_Var *var)
+void GameOver(Sys_Var *sys)
 {
-    int sys->xPos, sys->yPos;
     int Rcount = 0;
     int Bcount = 0;
 
@@ -128,80 +119,30 @@ void GameOver(Sys_Var *var)
     {
         for (sys->yPos = 0; sys->yPos < M_SIZE; sys->yPos++)
         {
-            if (var->R[sys->xPos][sys->yPos] == true)
+            if (sys->R[sys->xPos][sys->yPos] == true)
             {
                 Rcount++;
             }
-            if (var->B[sys->xPos][sys->yPos] == true)
+            if (sys->B[sys->xPos][sys->yPos] == true)
             {
                 Bcount++;   
             }
         }
     }
 
-    if (var->over == true)
+    if (sys->over == true)
     {
         if (Rcount > Bcount)
         {
-            strcpy(var->result, "R wins");
+            strcpy(sys->result, "R wins");
         } else if (Rcount < Bcount)
         {
-            strcpy(var->result, "B wins");
+            strcpy(sys->result, "B wins");
         } else if (Rcount == Bcount)
         {
-            strcpy(var->result, "draw");
+            strcpy(sys->result, "draw");
         }
     }
-}
-
-void Replace(Sys_Var *pos)
-{
-    pos->found = false;
-
-    //(go ∧ pos ∈ B) → (B = B − {pos} ∧ found = true)
-    if (go == true && B[pos->xPos][pos->yPos] == true)
-    {
-        pos->B[pos->xPos][pos->yPos] = false;
-        pos->found = true;
-    }
-    //(go ∧ pos ∈ R) → found = true
-    if (go == true && R[pos->xPos][pos->yPos] == true)
-    {
-        pos->found = true;
-    }
-    //(go ∧ pos̸∈ R) → (R = R ∪ {pos})
-    if (go == true && R[pos->xPos][pos->yPos] == false)
-    {
-        R[pos->xPos][pos->yPos] == true;
-    }
-    //(¬go ∧ pos ∈ R) → (R = R − {pos} ∧ found = true)
-    if (go == false && R[pos->xPos][pos->yPos] == true)
-    {
-        R[pos->xPos][pos->yPos] == false;
-        pos->found = true;
-    }
-    //(¬go ∧ pos ∈ B) → found = true
-    if (go == false && B[pos->xPos][pos->yPos] == true)
-    {
-        pos->found = true;
-    }
-    //(¬go ∧ pos̸∈ B) → (B = B ∪ {pos})
-    if (go == false && B[pos->xPos][pos->yPos] == false)
-    {
-        pos->B[pos->xPos][pos->yPos] = true;
-    }
-    //(found ∧ pos̸∈ S) → (S = S ∪ {pos} ∧ f ound = false)
-    if (found == true && S[pos->xPos][pos->yPos] == false)
-    {
-    S[pos->xPos][pos->yPos] == true;
-    pos->found = false;
-    }
-   //(found ∧ pos ∈ S ∧ pos̸∈ T ) → (T = T ∪ {pos} ∧ Expand(pos))
-   if (found == true && S[pos->xPos][pos->yPos] == true && T[pos->xPos][pos->yPos] == false)
-   {
-        T[pos->xPos][pos->yPos] == true;
-        Expand(*pos)
-   }
 }
 
 void Expand(Sys_Var *pos)
@@ -224,6 +165,57 @@ void Expand(Sys_Var *pos)
     //r = (a, b + 1)
     R[a][b + 1] = true;
 }
+
+void Replace(Sys_Var *pos)
+{
+    pos->found = false;
+
+    //(go ∧ pos ∈ B) → (B = B − {pos} ∧ found = true)
+    if (pos->go == true && pos->B[pos->xPos][pos->yPos] == true)
+    {
+        pos->B[pos->xPos][pos->yPos] = false;
+        pos->found = true;
+    }
+    //(go ∧ pos ∈ R) → found = true
+    if (pos->go == true && pos->R[pos->xPos][pos->yPos] == true)
+    {
+        pos->found = true;
+    }
+    //(go ∧ pos̸∈ R) → (R = R ∪ {pos})
+    if (pos->go == true && pos->R[pos->xPos][pos->yPos] == false)
+    {
+        pos->R[pos->xPos][pos->yPos] == true;
+    }
+    //(¬go ∧ pos ∈ R) → (R = R − {pos} ∧ found = true)
+    if (pos->go == false && pos->R[pos->xPos][pos->yPos] == true)
+    {
+        pos->R[pos->xPos][pos->yPos] == false;
+        pos->found = true;
+    }
+    //(¬go ∧ pos ∈ B) → found = true
+    if (pos->go == false && pos->B[pos->xPos][pos->yPos] == true)
+    {
+        pos->found = true;
+    }
+    //(¬go ∧ pos̸∈ B) → (B = B ∪ {pos})
+    if (pos->go == false && pos->B[pos->xPos][pos->yPos] == false)
+    {
+        pos->B[pos->xPos][pos->yPos] = true;
+    }
+    //(found ∧ pos̸∈ S) → (S = S ∪ {pos} ∧ f ound = false)
+    if (pos->found == true && pos->S[pos->xPos][pos->yPos] == false)
+    {
+        pos->S[pos->xPos][pos->yPos] == true;
+        pos->found = false;
+    }
+   //(found ∧ pos ∈ S ∧ pos̸∈ T ) → (T = T ∪ {pos} ∧ Expand(pos))
+   if (pos->found == true && pos->S[pos->xPos][pos->yPos] == true && pos->T[pos->xPos][pos->yPos] == false)
+   {
+        pos->T[pos->xPos][pos->yPos] == true;
+        Expand(pos);
+   }
+}
+
 
 void Update(Sys_Var *pos)
 {
@@ -259,39 +251,40 @@ void Update(Sys_Var *pos)
 
 void NextPlayerMove(Sys_Var *pos)
 {
+    int countR = CountSet(pos->R);
+    int countB = CountSet(pos->B);
+
     //(¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
-    if (over == false && start == true && go == true)
+    if (pos->over == false && pos->start == true && pos->go == true)
     {
-        R[pos->xPos][pos->yPos] == true;
-        S[pos->xPos][pos->yPos] == true;\
-        good = true;
+        pos->R[pos->xPos][pos->yPos] == true;
+        pos->S[pos->xPos][pos->yPos] == true;
+        pos->good = true;
     }
     //(¬over ∧ start ∧ ¬go) → (B = B ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
-    if (over == false && start == true and go == false)
+    if (pos->over == false && pos->start == true && pos->go == false)
     {
-        B[pos->xPos][pos->yPos] == true;
-        S[pos->xPos][pos->yPos] == true;
-        good = true;
+        pos->B[pos->xPos][pos->yPos] == true;
+        pos->S[pos->xPos][pos->yPos] == true;
+        pos->good = true;
     }
     //(¬over ∧ ¬start ∧ (go ∧ pos ∈ R ∨ ¬go ∧ pos ∈ B)) → (Update(pos) ∧ good = true)
-    if (over == false && start == false && (go == true && R[pos->xPos][pos->yPos] == true || go == false && B[pos->xPos][pos->yPos]))
+    if (pos->over == false && pos->start == false && (pos->go == true && pos->R[pos->xPos][pos->yPos] == true || pos->go == false && pos->B[pos->xPos][pos->yPos]))
     {
-        Update(*pos);
-        good = true;
+        Update(pos);
+        pos->good = true;
     }
     //(start ∧ |R| = 1 ∧ |B| = 1) → start = false
-    int countR = CountSet(R);
-    int countB = CountSet(B);
-    if (start == true && countR == 1 && countB == 1)
+    if (pos->start == true && countR == 1 && countB == 1)
     {
-        start = false;
+        pos->start = false;
     }
     //(¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
-    if (over == false && good == true)
+    if (pos->over == false && pos->good == true)
     {
-        good = false;
-        go = false;
-        val = val + 1;
+        pos->good = false;
+        pos->go = false;
+        pos->val = pos->val + 1;
     }
 }
 
