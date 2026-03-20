@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 #define M_SIZE 3
-#define true 1
-#define false 0
+#define TRUE 1
+#define FALSE 0
 
 /*
 Applicable Sets
 Set C = {x ∈ Z+ | x < 4}
 Set N = {x ∈ Z+ ∪ {0} | x <= 16}
 Set M = C × C
-Set V = {true, false}
+Set V = {TRUE, FALSE}
 */
 
 struct Sys_VarTag // System Variables
@@ -24,24 +24,28 @@ struct Sys_VarTag // System Variables
 
 typedef struct Sys_VarTag Sys_Var;
 
+// Function prototypes
+void Expand(Sys_Var *pos);
+void Replace(Sys_Var *pos);
+
 void SysInit(Sys_Var *sys) // Initializes all system variables according to specs
 {
     int i, j;
-    sys->good = false;
-    sys->go = false;
-    sys->start = false;
-    sys->over = false;
-    sys->found = false;
+    sys->good = FALSE;
+    sys->go = TRUE;
+    sys->start = TRUE;
+    sys->over = FALSE;
+    sys->found = FALSE;
     sys->val = 0;
     for (i = 0; i < M_SIZE; i++)
     {
         for (j = 0; j < M_SIZE; j++)
         {
-            sys->R[i][j] = false;
-            sys->B[i][j] = false;
-            sys->S[i][j] = false;
-            sys->T[i][j] = false;
-            sys->F[i][j] = false;
+            sys->R[i][j] = FALSE;
+            sys->B[i][j] = FALSE;
+            sys->S[i][j] = FALSE;
+            sys->T[i][j] = FALSE;
+            sys->F[i][j] = FALSE;
         }
     }
 }
@@ -55,7 +59,7 @@ int CountF(Sys_Var *sys) // Calculates how many cells are part of set F
     {
         for (j = 0; j < M_SIZE; j++)
         {
-            if (sys->R[sys->xPos][sys->yPos] == false && sys->B[sys->xPos][sys->yPos] == false)
+            if (sys->R[sys->xPos][sys->yPos] == FALSE && sys->B[sys->xPos][sys->yPos] == FALSE)
             {
                 count++;
             }
@@ -72,7 +76,7 @@ int CountSet(int set[M_SIZE][M_SIZE]) // Counts how many cells are part of a giv
     {
         for (j = 0; j < M_SIZE; j++)
         {
-            if (set[i][j] == true)
+            if (set[i][j] == TRUE)
             {
                 count++;
             }
@@ -86,27 +90,27 @@ void CheckOver(Sys_Var *sys) // Checks if the game is over and updates over vari
     int countF = CountF(sys);
     int countR = CountSet(sys->R);
     int countB = CountSet(sys->B);
-    if (countF == 3 || sys->val >= 20 || sys->start == false && ((countR > 0 && countB == 0) || (countR == 0 && countB > 0)))
+    if ((countF == 3 || sys->val >= 20 || sys->start == FALSE) && ((countR > 0 && countB == 0) || (countR == 0 && countB > 0)))
     {
-        sys->over = true;
+        sys->over = TRUE;
     }
     else
     {
-        sys->over = false;
+        sys->over = FALSE;
     }
 }
 
 
 void Remove(Sys_Var *pos){
-    if (pos->go == true){
-        pos->R[pos->xPos][pos->yPos] = false;
+    if (pos->go == TRUE){
+        pos->R[pos->xPos][pos->yPos] = FALSE;
     }
-    if (pos->go == false){
-        pos->B[pos->xPos][pos->yPos] = false;
+    if (pos->go == FALSE){
+        pos->B[pos->xPos][pos->yPos] = FALSE;
     }
 
-    pos->S[pos->xPos][pos->yPos] = false;
-    pos->T[pos->xPos][pos->yPos] = false;
+    pos->S[pos->xPos][pos->yPos] = FALSE;
+    pos->T[pos->xPos][pos->yPos] = FALSE;
 }
 
 void GameOver(Sys_Var *sys)
@@ -119,18 +123,18 @@ void GameOver(Sys_Var *sys)
     {
         for (sys->yPos = 0; sys->yPos < M_SIZE; sys->yPos++)
         {
-            if (sys->R[sys->xPos][sys->yPos] == true)
+            if (sys->R[sys->xPos][sys->yPos] == TRUE)
             {
                 Rcount++;
             }
-            if (sys->B[sys->xPos][sys->yPos] == true)
+            if (sys->B[sys->xPos][sys->yPos] == TRUE)
             {
                 Bcount++;   
             }
         }
     }
 
-    if (sys->over == true)
+    if (sys->over == TRUE)
     {
         if (Rcount > Bcount)
         {
@@ -145,73 +149,103 @@ void GameOver(Sys_Var *sys)
     }
 }
 
+void changePos(Sys_Var *sys, int pos[])
+{
+    sys->xPos = pos[0];
+    sys->yPos = pos[1];
+}
+
 void Expand(Sys_Var *pos)
 {
     //(a, b) = pos
-    int a = pos->xPos;
-    int b = pos->yPos;
+    int xy[2] = {pos->xPos, pos->yPos};
     //u, d, k, r ∈ M
-    int U[M_SIZE][M_SIZE];
-    int D[M_SIZE][M_SIZE];
-    int K[M_SIZE][M_SIZE];
-    int R[M_SIZE][M_SIZE];
+    int u[2];
+    int d[2];
+    int k[2];
+    int r[2];
 
     //u = (a − 1, b)
-    U[a - 1][b] = true;
+    u[0] = xy[0] - 1;
+    u[1] = xy[1];
     //d = (a + 1, b)
-    D[a + 1][b] = true;
+    d[0] = xy[0] + 1;
+    d[1] = xy[1];
     //k = (a, b − 1)
-    K[a][b - 1] = true;
+    k[0] = xy[0];
+    k[1] = xy[1] - 1;
     //r = (a, b + 1)
-    R[a][b + 1] = true;
+    r[0] = xy[0];
+    r[1] = xy[1] + 1;
+
+    Remove(pos);
+    if (pos->go == TRUE)
+    {
+        changePos(pos, u);
+        Replace(pos);
+    }
+    
+    if (pos->go == FALSE)
+    {
+        changePos(pos, d);
+        Replace(pos);
+    }
+    
+    changePos(pos, k);
+    Replace(pos);
+    
+    changePos(pos, r);
+    Replace(pos);
+    
+    changePos(pos, xy);
 }
 
 void Replace(Sys_Var *pos)
 {
-    pos->found = false;
+    pos->found = FALSE;
 
-    //(go ∧ pos ∈ B) → (B = B − {pos} ∧ found = true)
-    if (pos->go == true && pos->B[pos->xPos][pos->yPos] == true)
+    //(go ∧ pos ∈ B) → (B = B − {pos} ∧ found = TRUE)
+    if (pos->go == TRUE && pos->B[pos->xPos][pos->yPos] == TRUE)
     {
-        pos->B[pos->xPos][pos->yPos] = false;
-        pos->found = true;
+        pos->B[pos->xPos][pos->yPos] = FALSE;
+        pos->found = TRUE;
     }
-    //(go ∧ pos ∈ R) → found = true
-    if (pos->go == true && pos->R[pos->xPos][pos->yPos] == true)
+    //(go ∧ pos ∈ R) → found = TRUE
+    if (pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == TRUE)
     {
-        pos->found = true;
+        pos->found = TRUE;
     }
     //(go ∧ pos̸∈ R) → (R = R ∪ {pos})
-    if (pos->go == true && pos->R[pos->xPos][pos->yPos] == false)
+    if (pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == FALSE)
     {
-        pos->R[pos->xPos][pos->yPos] == true;
+        pos->R[pos->xPos][pos->yPos] = TRUE;
     }
-    //(¬go ∧ pos ∈ R) → (R = R − {pos} ∧ found = true)
-    if (pos->go == false && pos->R[pos->xPos][pos->yPos] == true)
+    //(¬go ∧ pos ∈ R) → (R = R − {pos} ∧ found = TRUE)
+    if (pos->go == FALSE && pos->R[pos->xPos][pos->yPos] == TRUE)
     {
-        pos->R[pos->xPos][pos->yPos] == false;
-        pos->found = true;
+        pos->R[pos->xPos][pos->yPos] = FALSE;
+        pos->found = TRUE;
     }
-    //(¬go ∧ pos ∈ B) → found = true
-    if (pos->go == false && pos->B[pos->xPos][pos->yPos] == true)
+    //(¬go ∧ pos ∈ B) → found = TRUE
+    if (pos->go == FALSE && pos->B[pos->xPos][pos->yPos] == TRUE)
     {
-        pos->found = true;
+        pos->found = TRUE;
     }
     //(¬go ∧ pos̸∈ B) → (B = B ∪ {pos})
-    if (pos->go == false && pos->B[pos->xPos][pos->yPos] == false)
+    if (pos->go == FALSE && pos->B[pos->xPos][pos->yPos] == FALSE)
     {
-        pos->B[pos->xPos][pos->yPos] = true;
+        pos->B[pos->xPos][pos->yPos] = TRUE;
     }
-    //(found ∧ pos̸∈ S) → (S = S ∪ {pos} ∧ f ound = false)
-    if (pos->found == true && pos->S[pos->xPos][pos->yPos] == false)
+    //(found ∧ pos̸∈ S) → (S = S ∪ {pos} ∧ f ound = FALSE)
+    if (pos->found == TRUE && pos->S[pos->xPos][pos->yPos] == FALSE)
     {
-        pos->S[pos->xPos][pos->yPos] == true;
-        pos->found = false;
+        pos->S[pos->xPos][pos->yPos] = TRUE;
+        pos->found = FALSE;
     }
    //(found ∧ pos ∈ S ∧ pos̸∈ T ) → (T = T ∪ {pos} ∧ Expand(pos))
-   if (pos->found == true && pos->S[pos->xPos][pos->yPos] == true && pos->T[pos->xPos][pos->yPos] == false)
+   if (pos->found == TRUE && pos->S[pos->xPos][pos->yPos] == TRUE && pos->T[pos->xPos][pos->yPos] == FALSE)
    {
-        pos->T[pos->xPos][pos->yPos] == true;
+        pos->T[pos->xPos][pos->yPos] = TRUE;
         Expand(pos);
    }
 }
@@ -224,28 +258,18 @@ void Update(Sys_Var *pos)
             return;
         }
 
-    pos->good = false;
+    pos->good = FALSE;
 
-    if (pos->S[pos->xPos][pos->yPos] == false)
+    if (pos->S[pos->xPos][pos->yPos] == FALSE)
     {
-        pos->S[pos->xPos][pos->yPos] = true;
-
-        if (pos->good == false)
-        {
-            pos->good = true;
-                if (pos->good == false)
-                {
-                    pos->good = true;
-                }
-                else
-                {
-                    pos->good = false;
-                }
-        }
+        pos->S[pos->xPos][pos->yPos] = TRUE;
+        pos->good = TRUE;
     }
-    if (pos->good == false && pos->S[pos->xPos][pos->yPos] == true && pos->T[pos->xPos][pos->yPos] == false)
+
+    if (pos->good == FALSE && pos->S[pos->xPos][pos->yPos] == TRUE && pos->T[pos->xPos][pos->yPos] == FALSE)
     {
-        pos->T[pos->xPos][pos->yPos] = true;
+        pos->T[pos->xPos][pos->yPos] = TRUE;
+        Expand(pos);
     }
 }
 
@@ -254,45 +278,122 @@ void NextPlayerMove(Sys_Var *pos)
     int countR = CountSet(pos->R);
     int countB = CountSet(pos->B);
 
-    //(¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
-    if (pos->over == false && pos->start == true && pos->go == true)
+    //(¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = TRUE)
+    if (pos->over == FALSE && pos->start == TRUE && pos->go == TRUE)
     {
-        pos->R[pos->xPos][pos->yPos] == true;
-        pos->S[pos->xPos][pos->yPos] == true;
-        pos->good = true;
+        pos->R[pos->xPos][pos->yPos] = TRUE;
+        pos->S[pos->xPos][pos->yPos] = TRUE;
+        pos->good = TRUE;
     }
-    //(¬over ∧ start ∧ ¬go) → (B = B ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
-    if (pos->over == false && pos->start == true && pos->go == false)
+    //(¬over ∧ start ∧ ¬go) → (B = B ∪ {pos} ∧ S = S ∪ {pos} ∧ good = TRUE)
+    if (pos->over == FALSE && pos->start == TRUE && pos->go == FALSE)
     {
-        pos->B[pos->xPos][pos->yPos] == true;
-        pos->S[pos->xPos][pos->yPos] == true;
-        pos->good = true;
+        pos->B[pos->xPos][pos->yPos] = TRUE;
+        pos->S[pos->xPos][pos->yPos] = TRUE;
+        pos->good = TRUE;
     }
-    //(¬over ∧ ¬start ∧ (go ∧ pos ∈ R ∨ ¬go ∧ pos ∈ B)) → (Update(pos) ∧ good = true)
-    if (pos->over == false && pos->start == false && (pos->go == true && pos->R[pos->xPos][pos->yPos] == true || pos->go == false && pos->B[pos->xPos][pos->yPos]))
+    //(¬over ∧ ¬start ∧ (go ∧ pos ∈ R ∨ ¬go ∧ pos ∈ B)) → (Update(pos) ∧ good = TRUE)
+    if (pos->over == FALSE && pos->start == FALSE && ((pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == TRUE) || (pos->go == FALSE && pos->B[pos->xPos][pos->yPos])))
     {
         Update(pos);
-        pos->good = true;
+        pos->good = TRUE;
     }
-    //(start ∧ |R| = 1 ∧ |B| = 1) → start = false
-    if (pos->start == true && countR == 1 && countB == 1)
+    //(start ∧ |R| = 1 ∧ |B| = 1) → start = FALSE
+    if (pos->start == TRUE && countR == 1 && countB == 1)
     {
-        pos->start = false;
+        pos->start = FALSE;
     }
     //(¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
-    if (pos->over == false && pos->good == true)
+    if (pos->over == FALSE && pos->good == TRUE)
     {
-        pos->good = false;
-        pos->go = false;
+        pos->good = FALSE;
+        pos->go = FALSE;
         pos->val = pos->val + 1;
     }
 }
 
+void display(Sys_Var sys)
+{
+    char pos[3][3];
+    int i, j;
+
+    for (i = 0; i < M_SIZE; i++)
+    {
+        for (j = 0; j < M_SIZE; j++)
+        {
+            if (sys.R[i][j] == TRUE && sys.B[i][j] == FALSE)
+            {
+                pos[i][j] = 'R';
+            } else if (sys.B[i][j] == TRUE && sys.R[i][j] == FALSE)
+            {
+                pos[i][j] = 'B';
+            } else
+            {
+                pos[i][j] = ' ';
+            }
+        }
+    }
+
+    printf("+---+---+---+\n");
+    printf("| %c | %c | %c |\n", pos[0][0], pos[1][0], pos[2][0]);
+    printf("+---+---+---+\n");
+    printf("| %c | %c | %c |\n", pos[0][1], pos[1][1], pos[2][1]);
+    printf("+---+---+---+\n");
+    printf("| %c | %c | %c |\n", pos[0][2], pos[1][2], pos[2][2]);
+    printf("+---+---+---+\n");
+}
+
 int main()
 {
-    Sys_Var Variables;
-    
-    SysInit(&Variables);
+    Sys_Var sys;
+    SysInit(&sys);
+    int x, y;
+
+    do {
+
+        if (sys.go == TRUE)
+        {
+            printf("Red's Turn:\n");
+            do
+            {
+                printf("x = ");
+                scanf("%d", &x);
+            } while (x > 3 && x < 1);
+            do
+            {
+                printf("y = ");
+                scanf("%d", &y);
+            } while (y > 3 && y < 1);
+            
+            sys.xPos = x-1;
+            sys.yPos = y-1;
+        } else
+        {
+            printf("Blue's Turn:\n");
+            do
+            {
+                printf("x = ");
+                scanf("%d", &x);
+            } while (x > 3 && x < 1);
+            do
+            {
+                printf("y = ");
+                scanf("%d", &y);
+            } while (y > 3 && y < 1);
+
+            sys.xPos = x-1;
+            sys.yPos = y-1;
+        }
+        display(sys);
+
+        NextPlayerMove(&sys);
+
+        CheckOver(&sys);
+
+    } while (sys.over != TRUE);
+    GameOver(&sys);
+
+    printf("%s", sys.result);
 
     return 0;
 }
