@@ -59,7 +59,7 @@ int CountF(Sys_Var *sys) // Calculates how many cells are part of set F
     {
         for (j = 0; j < M_SIZE; j++)
         {
-            if (sys->R[sys->xPos][sys->yPos] == FALSE && sys->B[sys->xPos][sys->yPos] == FALSE)
+            if (sys->R[i][j] == FALSE && sys->B[i][j] == FALSE)
             {
                 count++;
             }
@@ -90,7 +90,7 @@ void CheckOver(Sys_Var *sys) // Checks if the game is over and updates over vari
     int countF = CountF(sys);
     int countR = CountSet(sys->R);
     int countB = CountSet(sys->B);
-    if ((countF == 3 || sys->val >= 20 || sys->start == FALSE) && ((countR > 0 && countB == 0) || (countR == 0 && countB > 0)))
+    if ((countF == 3 || sys->val >= 20 || !sys->start) && ((countR > 0 && countB == 0) || (countR == 0 && countB > 0)))
     {
         sys->over = TRUE;
     }
@@ -101,11 +101,11 @@ void CheckOver(Sys_Var *sys) // Checks if the game is over and updates over vari
 }
 
 
-void Remove(Sys_Var *pos){
-    if (pos->go == TRUE){
+void Remove(Sys_Var *pos){ //Removes Current Location depending on whose turn it is
+    if (pos->go == TRUE){ //Red's Turn
         pos->R[pos->xPos][pos->yPos] = FALSE;
     }
-    if (pos->go == FALSE){
+    if (!pos->go){ //Blue's Turn
         pos->B[pos->xPos][pos->yPos] = FALSE;
     }
 
@@ -113,7 +113,7 @@ void Remove(Sys_Var *pos){
     pos->T[pos->xPos][pos->yPos] = FALSE;
 }
 
-void GameOver(Sys_Var *sys)
+void GameOver(Sys_Var *sys) //Cheks how many cells Red and Blue occupies, then decides who wins by how many are taken
 {
     int Rcount = 0;
     int Bcount = 0;
@@ -149,13 +149,13 @@ void GameOver(Sys_Var *sys)
     }
 }
 
-void changePos(Sys_Var *sys, int pos[])
+void changePos(Sys_Var *sys, int pos[])  //Updates Position
 {
     sys->xPos = pos[0];
     sys->yPos = pos[1];
 }
 
-void Expand(Sys_Var *pos)
+void Expand(Sys_Var *pos) //Expands Red or Blue's occupied spaces, and removes their original position
 {
     //(a, b) = pos
     int xy[2] = {pos->xPos, pos->yPos};
@@ -165,108 +165,125 @@ void Expand(Sys_Var *pos)
     int k[2];
     int r[2];
 
-    //u = (a − 1, b)
+    //u = (a − 1, b) To the Left
     u[0] = xy[0] - 1;
     u[1] = xy[1];
-    //d = (a + 1, b)
+    //d = (a + 1, b) To the Right
     d[0] = xy[0] + 1;
     d[1] = xy[1];
-    //k = (a, b − 1)
+    //k = (a, b − 1) Down
     k[0] = xy[0];
     k[1] = xy[1] - 1;
-    //r = (a, b + 1)
+    //r = (a, b + 1) Up
     r[0] = xy[0];
     r[1] = xy[1] + 1;
 
     Remove(pos);
-    if (pos->go == TRUE)
+    if(u[0] >= 2 && u[0] <= 0 && u[1] >= 2 && u[0] <= 0)
     {
-        changePos(pos, u);
-        Replace(pos);
+        if (pos->go == TRUE)
+        {
+            changePos(pos, u);
+            Replace(pos);
+        }
     }
     
-    if (pos->go == FALSE)
+    if(d[0] >= 2 && d[0] <= 0 && d[1] >= 2 && d[0] <= 0)
     {
-        changePos(pos, d);
+        if (pos->go == FALSE)
+        {
+            changePos(pos, d);
+            Replace(pos);
+        }
+    }
+
+    if(k[0] >= 2 && k[0] <= 0 && k[1] >= 2 && k[0] <= 0)
+    {
+        changePos(pos, k);
         Replace(pos);
     }
-    
-    changePos(pos, k);
-    Replace(pos);
-    
-    changePos(pos, r);
-    Replace(pos);
+
+    if(r[0] >= 2 && r[0] <= 0 && r[1] >= 2 && r[0] <= 0)
+    {
+        changePos(pos, r);
+        Replace(pos);
+    }   
     
     changePos(pos, xy);
 }
 
-void Replace(Sys_Var *pos)
+void Replace(Sys_Var *pos) //
 {
-    pos->found = FALSE;
+    pos->found = FALSE; //Flag
 
     //(go ∧ pos ∈ B) → (B = B − {pos} ∧ found = TRUE)
-    if (pos->go == TRUE && pos->B[pos->xPos][pos->yPos] == TRUE)
+    if (pos->go == TRUE && pos->B[pos->xPos][pos->yPos] == TRUE) //Red's Turn
     {
-        pos->B[pos->xPos][pos->yPos] = FALSE;
+        pos->B[pos->xPos][pos->yPos] = FALSE; //Occupies what was Blue's Cell
         pos->found = TRUE;
     }
     //(go ∧ pos ∈ R) → found = TRUE
-    if (pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == TRUE)
+    if (pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == TRUE) //Red's Turn
     {
-        pos->found = TRUE;
+        pos->found = TRUE; //Cell remains occupied by Red
     }
     //(go ∧ pos̸∈ R) → (R = R ∪ {pos})
-    if (pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == FALSE)
+    if (pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == FALSE) //Red's Turn
     {
-        pos->R[pos->xPos][pos->yPos] = TRUE;
+        pos->R[pos->xPos][pos->yPos] = TRUE; //Red occupies cell
     }
     //(¬go ∧ pos ∈ R) → (R = R − {pos} ∧ found = TRUE)
-    if (pos->go == FALSE && pos->R[pos->xPos][pos->yPos] == TRUE)
+    if (!pos->go && pos->R[pos->xPos][pos->yPos] == TRUE) //Blue's Turn
     {
-        pos->R[pos->xPos][pos->yPos] = FALSE;
+        pos->R[pos->xPos][pos->yPos] = FALSE; //Occupies what was Red's Cell
         pos->found = TRUE;
     }
     //(¬go ∧ pos ∈ B) → found = TRUE
-    if (pos->go == FALSE && pos->B[pos->xPos][pos->yPos] == TRUE)
+    if (!pos->go && pos->B[pos->xPos][pos->yPos] == TRUE) //Blue's Turn
     {
-        pos->found = TRUE;
+        pos->found = TRUE; //Cell remains occupied by Blue
     }
     //(¬go ∧ pos̸∈ B) → (B = B ∪ {pos})
-    if (pos->go == FALSE && pos->B[pos->xPos][pos->yPos] == FALSE)
+    if (!pos->go && pos->B[pos->xPos][pos->yPos] == FALSE) //Blue's Turn
     {
-        pos->B[pos->xPos][pos->yPos] = TRUE;
+        pos->B[pos->xPos][pos->yPos] = TRUE; //Blue occupies cell
     }
     //(found ∧ pos̸∈ S) → (S = S ∪ {pos} ∧ f ound = FALSE)
     if (pos->found == TRUE && pos->S[pos->xPos][pos->yPos] == FALSE)
     {
-        pos->S[pos->xPos][pos->yPos] = TRUE;
+        pos->S[pos->xPos][pos->yPos] = TRUE; //Records position as "found"
         pos->found = FALSE;
     }
    //(found ∧ pos ∈ S ∧ pos̸∈ T ) → (T = T ∪ {pos} ∧ Expand(pos))
    if (pos->found == TRUE && pos->S[pos->xPos][pos->yPos] == TRUE && pos->T[pos->xPos][pos->yPos] == FALSE)
    {
-        pos->T[pos->xPos][pos->yPos] = TRUE;
+        pos->T[pos->xPos][pos->yPos] = TRUE; //Checks position's neighbors (Left, Right, Down, Up)
         Expand(pos);
    }
 }
 
 
-void Update(Sys_Var *pos)
+void Update(Sys_Var *pos) //
 {
-    if (pos->xPos < 0 || pos->xPos >= M_SIZE || pos->yPos < 0 || pos->yPos >= M_SIZE) 
+    if (pos->xPos < 0 || pos->xPos >= M_SIZE || pos->yPos < 0 || pos->yPos >= M_SIZE) //Checks if its an invalid Position
         {
             return;
         }
 
-    pos->good = FALSE;
+    pos->good = FALSE; //Invalid Position
 
-    if (pos->S[pos->xPos][pos->yPos] == FALSE)
+    if (pos->S[pos->xPos][pos->yPos] == FALSE) //If cell is not in S, add it to S and Declare good as true
     {
         pos->S[pos->xPos][pos->yPos] = TRUE;
-        pos->good = TRUE;
+        if (pos->good == TRUE){
+            pos->good = FALSE;
+        }
+        else{
+            pos->good = TRUE;
+        }
     }
 
-    if (pos->good == FALSE && pos->S[pos->xPos][pos->yPos] == TRUE && pos->T[pos->xPos][pos->yPos] == FALSE)
+    if (!pos->good && pos->S[pos->xPos][pos->yPos] == TRUE && pos->T[pos->xPos][pos->yPos] == FALSE)
     {
         pos->T[pos->xPos][pos->yPos] = TRUE;
         Expand(pos);
@@ -279,21 +296,21 @@ void NextPlayerMove(Sys_Var *pos)
     int countB = CountSet(pos->B);
 
     //(¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = TRUE)
-    if (pos->over == FALSE && pos->start == TRUE && pos->go == TRUE)
+    if (!pos->over && pos->start && pos->go)
     {
         pos->R[pos->xPos][pos->yPos] = TRUE;
         pos->S[pos->xPos][pos->yPos] = TRUE;
         pos->good = TRUE;
     }
     //(¬over ∧ start ∧ ¬go) → (B = B ∪ {pos} ∧ S = S ∪ {pos} ∧ good = TRUE)
-    if (pos->over == FALSE && pos->start == TRUE && pos->go == FALSE)
+    if (!pos->over && pos->start && !pos->go)
     {
         pos->B[pos->xPos][pos->yPos] = TRUE;
         pos->S[pos->xPos][pos->yPos] = TRUE;
         pos->good = TRUE;
     }
     //(¬over ∧ ¬start ∧ (go ∧ pos ∈ R ∨ ¬go ∧ pos ∈ B)) → (Update(pos) ∧ good = TRUE)
-    if (pos->over == FALSE && pos->start == FALSE && ((pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == TRUE) || (pos->go == FALSE && pos->B[pos->xPos][pos->yPos])))
+    if (!pos->over && !pos->start && ((pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == TRUE) || (pos->go == FALSE && pos->B[pos->xPos][pos->yPos])))
     {
         Update(pos);
         pos->good = TRUE;
@@ -304,13 +321,26 @@ void NextPlayerMove(Sys_Var *pos)
         pos->start = FALSE;
     }
     //(¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
-    if (pos->over == FALSE && pos->good == TRUE)
+    if (!pos->over && pos->good)
     {
-        pos->good = FALSE;
-        pos->go = FALSE;
+        if (pos->good == TRUE){
+            pos->good = FALSE;
+        }
+        else{
+            pos->good = TRUE;
+        }
+        
+        if (pos->go == TRUE){
+            pos->go = FALSE;
+        }
+        else{
+            pos->go = TRUE;
+        }
+
         pos->val = pos->val + 1;
     }
 }
+
 
 void display(Sys_Var sys)
 {
@@ -350,7 +380,7 @@ int main()
     int x, y;
 
     do {
-
+        display(sys);
         if (sys.go == TRUE)
         {
             printf("Red's Turn:\n");
@@ -384,7 +414,7 @@ int main()
             sys.xPos = x-1;
             sys.yPos = y-1;
         }
-        display(sys);
+        printf("%d",sys.go);
 
         NextPlayerMove(&sys);
 
