@@ -90,7 +90,7 @@ void CheckOver(Sys_Var *sys) // Checks if the game is over and updates over vari
     int countF = CountF(sys);
     int countR = CountSet(sys->R);
     int countB = CountSet(sys->B);
-    if ((countF == 3 || sys->val >= 20 || !sys->start) && ((countR > 0 && countB == 0) || (countR == 0 && countB > 0)))
+    if (countF == 3 || sys->val >= 20 || (!sys->start && ((countR > 0 && countB == 0) || (countR == 0 && countB > 0))))
     {
         sys->over = TRUE;
     }
@@ -113,7 +113,7 @@ void Remove(Sys_Var *pos){ //Removes Current Location depending on whose turn it
     pos->T[pos->xPos][pos->yPos] = FALSE;
 }
 
-void GameOver(Sys_Var *sys) //Cheks how many cells Red and Blue occupies, then decides who wins by how many are taken
+void GameOver(Sys_Var *sys) //Checks how many cells Red and Blue occupies, then decides who wins by how many are taken
 {
     int Rcount = 0;
     int Bcount = 0;
@@ -179,7 +179,7 @@ void Expand(Sys_Var *pos) //Expands Red or Blue's occupied spaces, and removes t
     r[1] = xy[1] + 1;
 
     Remove(pos);
-    if(u[0] >= 2 && u[0] <= 0 && u[1] >= 2 && u[0] <= 0)
+    if(u[0] >= 0 && u[0] <= 2 && u[1] >= 0 && u[1] <= 2) 
     {
         if (pos->go == TRUE)
         {
@@ -188,7 +188,7 @@ void Expand(Sys_Var *pos) //Expands Red or Blue's occupied spaces, and removes t
         }
     }
     
-    if(d[0] >= 2 && d[0] <= 0 && d[1] >= 2 && d[0] <= 0)
+    if(d[0] >= 0 && d[0] <= 2 && d[1] >= 0 && d[1] <= 2)
     {
         if (pos->go == FALSE)
         {
@@ -197,13 +197,13 @@ void Expand(Sys_Var *pos) //Expands Red or Blue's occupied spaces, and removes t
         }
     }
 
-    if(k[0] >= 2 && k[0] <= 0 && k[1] >= 2 && k[0] <= 0)
+    if(k[0] >= 0 && k[0] <= 2 && k[1] >= 0 && k[1] <= 2)
     {
         changePos(pos, k);
         Replace(pos);
     }
 
-    if(r[0] >= 2 && r[0] <= 0 && r[1] >= 2 && r[0] <= 0)
+    if(r[0] >= 0 && r[0] <= 2 && r[1] >= 0 && r[1] <= 2)
     {
         changePos(pos, r);
         Replace(pos);
@@ -263,13 +263,8 @@ void Replace(Sys_Var *pos) //
 }
 
 
-void Update(Sys_Var *pos) //
+void Update(Sys_Var *pos) 
 {
-    if (pos->xPos < 0 || pos->xPos >= M_SIZE || pos->yPos < 0 || pos->yPos >= M_SIZE) //Checks if its an invalid Position
-        {
-            return;
-        }
-
     pos->good = FALSE; //Invalid Position
 
     if (pos->S[pos->xPos][pos->yPos] == FALSE) //If cell is not in S, add it to S and Declare good as true
@@ -283,7 +278,7 @@ void Update(Sys_Var *pos) //
         }
     }
 
-    if (!pos->good && pos->S[pos->xPos][pos->yPos] == TRUE && pos->T[pos->xPos][pos->yPos] == FALSE)
+    if (!pos->good && pos->S[pos->xPos][pos->yPos] == TRUE && pos->T[pos->xPos][pos->yPos] == FALSE) //(¬good ∧ pos ∈ S ∧ pos ̸∈ T) → (T = T ∪ {pos} ∧ Expand(pos))
     {
         pos->T[pos->xPos][pos->yPos] = TRUE;
         Expand(pos);
@@ -292,29 +287,30 @@ void Update(Sys_Var *pos) //
 
 void NextPlayerMove(Sys_Var *pos)
 {
-    int countR = CountSet(pos->R);
-    int countB = CountSet(pos->B);
-
     //(¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = TRUE)
-    if (!pos->over && pos->start && pos->go)
+    if (!pos->over && pos->start && pos->go) //Red's Turn
     {
         pos->R[pos->xPos][pos->yPos] = TRUE;
         pos->S[pos->xPos][pos->yPos] = TRUE;
         pos->good = TRUE;
     }
     //(¬over ∧ start ∧ ¬go) → (B = B ∪ {pos} ∧ S = S ∪ {pos} ∧ good = TRUE)
-    if (!pos->over && pos->start && !pos->go)
+    if (!pos->over && pos->start && !pos->go) //Blue's Turn
     {
         pos->B[pos->xPos][pos->yPos] = TRUE;
         pos->S[pos->xPos][pos->yPos] = TRUE;
         pos->good = TRUE;
     }
     //(¬over ∧ ¬start ∧ (go ∧ pos ∈ R ∨ ¬go ∧ pos ∈ B)) → (Update(pos) ∧ good = TRUE)
-    if (!pos->over && !pos->start && ((pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == TRUE) || (pos->go == FALSE && pos->B[pos->xPos][pos->yPos])))
+    if (!pos->over && !pos->start && ((pos->go == TRUE && pos->R[pos->xPos][pos->yPos] == TRUE) || (!pos->go && pos->B[pos->xPos][pos->yPos])))
     {
         Update(pos);
         pos->good = TRUE;
     }
+
+    int countR = CountSet(pos->R);
+    int countB = CountSet(pos->B);
+    
     //(start ∧ |R| = 1 ∧ |B| = 1) → start = FALSE
     if (pos->start == TRUE && countR == 1 && countB == 1)
     {
@@ -380,7 +376,7 @@ int main()
     int x, y;
 
     do {
-        display(sys);
+        
         if (sys.go == TRUE)
         {
             printf("Red's Turn:\n");
@@ -388,12 +384,12 @@ int main()
             {
                 printf("x = ");
                 scanf("%d", &x);
-            } while (x > 3 && x < 1);
+            } while (x > 3 || x < 1);
             do
             {
                 printf("y = ");
                 scanf("%d", &y);
-            } while (y > 3 && y < 1);
+            } while (y > 3 || y < 1);
             
             sys.xPos = x-1;
             sys.yPos = y-1;
@@ -404,21 +400,22 @@ int main()
             {
                 printf("x = ");
                 scanf("%d", &x);
-            } while (x > 3 && x < 1);
+            } while (x > 3 || x < 1);
             do
             {
                 printf("y = ");
                 scanf("%d", &y);
-            } while (y > 3 && y < 1);
+            } while (y > 3 || y < 1); 
 
             sys.xPos = x-1;
             sys.yPos = y-1;
         }
-        printf("%d",sys.go);
 
         NextPlayerMove(&sys);
 
         CheckOver(&sys);
+
+        display(sys);
 
     } while (sys.over != TRUE);
     GameOver(&sys);
