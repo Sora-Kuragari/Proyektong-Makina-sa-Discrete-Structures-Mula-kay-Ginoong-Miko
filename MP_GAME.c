@@ -276,6 +276,7 @@ void Update(Sys_Var *pos)
         else{
             pos->good = TRUE;
         }
+        
     }
 
     if (!pos->good && pos->S[pos->xPos][pos->yPos] == TRUE && pos->T[pos->xPos][pos->yPos] == FALSE) //(¬good ∧ pos ∈ S ∧ pos ̸∈ T) → (T = T ∪ {pos} ∧ Expand(pos))
