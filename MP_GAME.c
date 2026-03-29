@@ -319,24 +319,33 @@ void NextPlayerMove(Sys_Var *pos)
     //(¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
     if (!pos->over && pos->good)
     {
-        if (pos->good == TRUE){
-            pos->good = FALSE;
-        }
-        else{
-            pos->good = TRUE;
-        }
+        pos->good = !pos->good;
         
-        if (pos->go == TRUE){
-            pos->go = FALSE;
-        }
-        else{
-            pos->go = TRUE;
-        }
+        pos->go = !pos->go;
 
         pos->val = pos->val + 1;
     }
 }
 
+char status(Sys_Var sys, int x, int y)
+{
+    char res;
+    if (sys.S[x][y] == TRUE)
+    {
+        res = '!';
+    } else
+    {
+        if (sys.R[x][y] == FALSE && sys.B[x][y] == FALSE)
+        {
+            res = ' ';
+        } else
+        {
+            res = '.';
+        }
+    }
+
+    return res;
+}
 
 void display(Sys_Var sys)
 {
@@ -360,13 +369,16 @@ void display(Sys_Var sys)
         }
     }
 
-    printf("+---+---+---+\n");
-    printf("| %c | %c | %c |\n", pos[0][0], pos[1][0], pos[2][0]);
-    printf("+---+---+---+\n");
-    printf("| %c | %c | %c |\n", pos[0][1], pos[1][1], pos[2][1]);
-    printf("+---+---+---+\n");
-    printf("| %c | %c | %c |\n", pos[0][2], pos[1][2], pos[2][2]);
-    printf("+---+---+---+\n");
+    // Board
+    printf("================\n");
+    printf("*    Turn %-02d   *\n", sys.val+1);
+    printf("+----+----+----+\n");
+    printf("| %c%c | %c%c | %c%c |\n", pos[0][0], visual(sys, 0, 0),  pos[1][0], visual(sys, 1, 0), pos[2][0], visual(sys, 2, 0));
+    printf("+----+----+----+\n");
+    printf("| %c%c | %c%c | %c%c |\n", pos[0][1], visual(sys, 0, 1), pos[1][1], visual(sys, 1, 1), pos[2][1], visual(sys, 2, 1));
+    printf("+----+----+----+\n");
+    printf("| %c%c | %c%c | %c%c |\n", pos[0][2], visual(sys, 0, 2), pos[1][2], visual(sys, 1, 2), pos[2][2], visual(sys, 2, 2));
+    printf("+----+----+----+\n");
 }
 
 int main()
@@ -374,6 +386,8 @@ int main()
     Sys_Var sys;
     SysInit(&sys);
     int x, y;
+
+    display(sys);
 
     do {
         
