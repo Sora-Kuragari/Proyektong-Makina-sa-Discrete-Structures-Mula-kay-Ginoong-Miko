@@ -327,7 +327,7 @@ void NextPlayerMove(Sys_Var *pos)
     }
 }
 
-char visual(Sys_Var sys, int x, int y)
+char status(Sys_Var sys, int x, int y)
 {
     char res;
     if (sys.S[x][y] == TRUE)
