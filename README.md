@@ -12,9 +12,9 @@ Status:
 -'!' - occupied (triggerable)
 
 Game will end either:
--Empty spaces is 3
--Either Red or Blue, but not both, have 0 occupied space
--Both players 
+- Empty spaces is 3
+- Either Red or Blue, but not both, have 0 occupied space
+- Both players 
 
 Created by:
 John Hayden Acosta, Gabriel Angelo De Silva, Jacob Miguel Gregorio
