@@ -3,13 +3,14 @@
 <h2>How to Play:</h2>
 Players take turn trying to conquer the 3x3 grid.
 
-Red Expand Direction: Up, Down, Left
-Blue Expand Direction: Up, Down, Right
+
+<p>Red Expand Direction: Up, Down, Left</p>
+<p>Blue Expand Direction: Up, Down, Right</p>
 
 Status:
--' ' - empty
--'.' - occupied
--'!' - occupied (triggerable)
+- ' ' - empty
+- '.' - occupied
+- '!' - occupied (triggerable)
 
 Game will end either:
 - Empty spaces is 3
