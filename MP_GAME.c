@@ -327,7 +327,7 @@ void NextPlayerMove(Sys_Var *pos)
     }
 }
 
-char status(Sys_Var sys, int x, int y)
+char visual(Sys_Var sys, int x, int y)
 {
     char res;
     if (sys.S[x][y] == TRUE)
@@ -371,7 +371,7 @@ void display(Sys_Var sys)
 
     // Board
     printf("================\n");
-    printf("*    Turn %-02d   *\n", sys.val+1);
+    printf("*    Turn %02d   *\n", sys.val+1);
     printf("+----+----+----+\n");
     printf("| %c%c | %c%c | %c%c |\n", pos[0][0], visual(sys, 0, 0),  pos[1][0], visual(sys, 1, 0), pos[2][0], visual(sys, 2, 0));
     printf("+----+----+----+\n");
